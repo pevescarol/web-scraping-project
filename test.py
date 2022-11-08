@@ -223,14 +223,92 @@ def consultar_maiz():
         conexion.close()
         ### CALCULAR VARIACION
         # variacion = ((val_actual - val_anterior) / val_anterior) * 100
-        variacion_sembrado = ((valor_actual_sembrado - valor_ant_sembrado) / valor_ant_sembrado) * 100
-        variacion_rinde = ((valor_actual_rinde - valor_ant_rinde) / valor_ant_rinde) * 100
-        variacion_produccion = ((valor_actual_produccion - valor_ant_produccion) / valor_ant_produccion) * 100
         
-        print("\n")
-        print(f"Variación del area sembrada en base al anio anterior: {round(variacion_sembrado, 1)}%\n")
-        print(f"Variación rindes en base al anio anterior: {round(variacion_rinde, 1)}%\n")
-        print(f"Variación de la producción en base al anio anterior: {round(variacion_produccion, 1)}%\n")
+        if valor_actual_sembrado == 0.:
+            print("Variación no disponible")
+        else: 
+            variacion_sembrado = ((valor_actual_sembrado - valor_ant_sembrado) / valor_ant_sembrado) * 100
+            print("\n")
+            print(f"Variación del area sembrada en base al anio anterior: {round(variacion_sembrado, 1)}%\n")
+
+        if valor_actual_rinde == 0.:
+            print("Variación rindes no disponible")
+        else:
+            variacion_rinde = ((valor_actual_rinde - valor_ant_rinde) / valor_ant_rinde) * 100
+            print(f"Variación rindes en base al anio anterior: {round(variacion_rinde, 1)}%\n")
+
+        if valor_actual_produccion == 0.:
+            print("Variación de la producción no disponible")
+        else: 
+            variacion_produccion = ((valor_actual_produccion - valor_ant_produccion) / valor_ant_produccion) * 100
+            print(f"Variación de la producción en base al anio anterior: {round(variacion_produccion, 1)}%\n")
+
+def consultar_soja():
+        conexion = sqlite3.connect("agricultura_test.db")
+        cursor = conexion.cursor()
+        ##  print  trigos
+        cursor.execute('select * from proyecciones_test where (cultivo=:s)', {'s':'Soja'})
+        busqueda = cursor.fetchall()
+        print("\nTabla de la soja: ")
+        for i in busqueda:
+            print(i)
+
+        ##  print fila especifica: ultimo año
+        cursor.execute('select * from proyecciones_test where (cultivo=:s and periodo=:p)', {'s':'Soja','p':'2022/2023'})
+        busqueda2 = cursor.fetchall()
+
+        for item in busqueda2:
+            for index,i in enumerate(item):
+                if index == 2:
+                    valor_actual_sembrado = float(i.strip(" QQ/ MILLONES HA TA").replace(',','.'))
+                elif index == 3:
+                    valor_actual_rinde = i.strip(" QQ/ MILLONES HA TA").replace(',','.')
+                    if valor_actual_rinde == '':
+                        valor_actual_rinde = float(0)
+                    else:
+                        valor_actual_rinde = float(i.strip(" QQ/ MILLONES HA TA").replace(',','.'))
+                elif index == 4:
+                    valor_actual_produccion = i.strip(" QQ/ MILLONES HA TA").replace(',','.')
+                    if valor_actual_produccion == '':
+                        valor_actual_produccion = float(0)
+                    else:
+                        valor_actual_produccion = float(i.strip(" QQ/ MILLONES HA TA").replace(',','.'))
+
+        ##  print fila especifica: año anterior
+        cursor.execute('select * from proyecciones_test where (cultivo=:s and periodo=:p)', {'s':'Soja','p':'2021/2022'})
+        busqueda3 = cursor.fetchall()
+
+        for item in busqueda3:
+            for index,i in enumerate(item):
+                if index == 2:
+                    valor_ant_sembrado = float(i.strip(" QQ/ MILLONES HA TA").replace(',','.'))
+                elif index == 3:
+                    valor_ant_rinde = float(i.strip(" QQ/ MILLONES HA TA").replace(',','.'))
+                elif index == 4:
+                    valor_ant_produccion = float(i.strip(" QQ/ MILLONES HA TA").replace(',','.'))
+
+        conexion.close()
+        ### CALCULAR VARIACION
+        # variacion = ((val_actual - val_anterior) / val_anterior) * 100
+        
+        if valor_actual_sembrado == 0.:
+            print("Variación no disponible")
+        else: 
+            variacion_sembrado = ((valor_actual_sembrado - valor_ant_sembrado) / valor_ant_sembrado) * 100
+            print("\n")
+            print(f"Variación del area sembrada en base al anio anterior: {round(variacion_sembrado, 1)}%\n")
+
+        if valor_actual_rinde == 0.:
+            print("Variación rindes no disponible")
+        else:
+            variacion_rinde = ((valor_actual_rinde - valor_ant_rinde) / valor_ant_rinde) * 100
+            print(f"Variación rindes en base al anio anterior: {round(variacion_rinde, 1)}%\n")
+
+        if valor_actual_produccion == 0.:
+            print("Variación de la producción no disponible")
+        else: 
+            variacion_produccion = ((valor_actual_produccion - valor_ant_produccion) / valor_ant_produccion) * 100
+            print(f"Variación de la producción en base al anio anterior: {round(variacion_produccion, 1)}%\n")
 
 
 
@@ -242,13 +320,14 @@ while True:
     cargar_datos_proyecciones()
     print("*********************************************\n")
     #####
-    print('Ingresa la opción deseada: ')
+    print('PROYECCIONES PARA LA PRODUCCION DE GRANOS EN ARGENTINA')
     print("""
-    \t 1 - Ver proyecciones de la producción de granos en el último año
-    \t 2 - Ver proyecciones del trigo y su variacion
-    \t 3 - Ver proyecciones del maiz y su variacion
-    \t 4 - Ver proyecciones de la soja y su variacion
-    """)
+\t 1 - Ver proyecciones de los granos en el último año
+\t 2 - Ver proyecciones del trigo y su variacion
+\t 3 - Ver proyecciones del maiz y su variacion
+\t 4 - Ver proyecciones de la soja y su variacion
+""")
+    print('Ingresa la opción deseada: ')
     opcion = input('>')
 
     if opcion == '1':
@@ -266,6 +345,10 @@ while True:
 
     elif opcion == '3':
         consultar_maiz()
+        eliminar_datos_proyecciones()
+
+    elif opcion == '4':
+        consultar_soja()
         eliminar_datos_proyecciones()
 
     else:
