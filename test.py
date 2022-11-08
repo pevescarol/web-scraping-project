@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
 import sqlite3
+import pandas as pd
 
 
 ##########################################
@@ -98,7 +99,7 @@ def cargar_datos_proyecciones():
     if listTables == []:
         print('...Creando tabla')
         #Creamos la tabla proyecciones
-        cursor.execute(f"CREATE TABLE proyecciones_test (cultivo VARCHAR(100), periodo VARCHAR(100), {listado_header[1]} VARCHAR(100), {listado_header[2]} VARCHAR(100), {listado_header[3]} VARCHAR(100))")
+        cursor.execute(f"CREATE TABLE proyecciones_test (Cultivo VARCHAR(100), Periodo VARCHAR(100), {listado_header[1]} VARCHAR(100), {listado_header[2]} VARCHAR(100), {listado_header[3]} VARCHAR(100))")
 
     else:
         print('Tabla encontrada')
@@ -132,11 +133,14 @@ def consultar_trigo():
         conexion = sqlite3.connect("agricultura_test.db")
         cursor = conexion.cursor()
         ##  print  trigos
-        cursor.execute('select * from proyecciones_test where (cultivo=:t)', {'t':'Trigo'})
-        busqueda = cursor.fetchall()
-        print("\nTabla de trigos: ")
-        for i in busqueda:
-            print(i)
+        #cursor.execute('select * from proyecciones_test where (cultivo=:t)', {'t':'Trigo'})
+        #busqueda = cursor.fetchall()
+        #print("\nTabla de trigos: ")
+        #for i in busqueda:
+        #    print(i)
+        print("\nTabla de proyecciones del Trigo:")
+        df = pd.read_sql_query("select * from proyecciones_test where Cultivo = 'Trigo'", conexion)
+        print(df.head())
 
         ##  print fila especifica: ultimo año
         cursor.execute('select * from proyecciones_test where (cultivo=:t and periodo=:p)', {'t':'Trigo','p':'2022/2023'})
@@ -180,11 +184,17 @@ def consultar_maiz():
         conexion = sqlite3.connect("agricultura_test.db")
         cursor = conexion.cursor()
         ##  print  trigos
+        """
         cursor.execute('select * from proyecciones_test where (cultivo=:m)', {'m':'Maiz'})
         busqueda = cursor.fetchall()
         print("\nTabla del maiz: ")
         for i in busqueda:
             print(i)
+        """
+
+        print("\nTabla de proyecciones del Maiz:")
+        df = pd.read_sql_query("select * from proyecciones_test where Cultivo = 'Maiz'", conexion)
+        print(df.head())
 
         ##  print fila especifica: ultimo año
         cursor.execute('select * from proyecciones_test where (cultivo=:m and periodo=:p)', {'m':'Maiz','p':'2022/2023'})
@@ -247,11 +257,16 @@ def consultar_soja():
         conexion = sqlite3.connect("agricultura_test.db")
         cursor = conexion.cursor()
         ##  print  trigos
+        """
         cursor.execute('select * from proyecciones_test where (cultivo=:s)', {'s':'Soja'})
         busqueda = cursor.fetchall()
         print("\nTabla de la soja: ")
         for i in busqueda:
             print(i)
+        """
+        print("\nTabla de proyecciones de la Soja:")
+        df = pd.read_sql_query("select * from proyecciones_test where Cultivo = 'Soja'", conexion)
+        print(df.head())
 
         ##  print fila especifica: ultimo año
         cursor.execute('select * from proyecciones_test where (cultivo=:s and periodo=:p)', {'s':'Soja','p':'2022/2023'})
@@ -335,8 +350,14 @@ while True:
         conexion = sqlite3.connect("agricultura_test.db")
         cursor = conexion.cursor()
         # haceoms consulta a la bd
-        for row in cursor.execute('select * from proyecciones_test'):
-            print(row)
+        #for row in cursor.execute('select * from proyecciones_test'):
+        #    print(row)
+
+        df = pd.read_sql_query('select * from proyecciones_test', conexion)
+        # Ver  el resultado de la consulta SQL está
+        # almacenado en el DataFrame
+        print(">>> Proyecciones de la producción de granos: ")
+        print(df.head())
         eliminar_datos_proyecciones()
     
     elif opcion == '2':
