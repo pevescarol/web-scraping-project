@@ -2,9 +2,11 @@ from bs4 import BeautifulSoup
 import requests
 import sqlite3
 import pandas as pd
-
+import platform
+import os
 
 #############################################################################
+###### Web Scraping "www.bcr.com.ar" ######
 def cargar_datos_proyecciones():
 
     html_text = requests.get('https://www.bcr.com.ar/es/mercados/gea/estimaciones-nacionales-de-produccion/estimaciones').text
@@ -14,7 +16,7 @@ def cargar_datos_proyecciones():
 
     #me trae todas las tablas de cada cultivo
     #cultivos = estimaciones.find_all('table', class_ = 'bcr-estimaciones')
-#############################################################################
+##################################3
     #Tabla del Trigo
     trigo = estimaciones.find('table', class_ = 'bcr-estimaciones trigo color')
 
@@ -38,7 +40,7 @@ def cargar_datos_proyecciones():
     trigo_ultimo_anio = (listado_header[0], listado_ultimo_anio[0], listado_ultimo_anio[1].replace('MILLONES HA', ' MILLONES HA'), listado_ultimo_anio[2].replace('QQ/HA', ' QQ/HA'), listado_ultimo_anio[3].replace('MILLONES TN', ' MILLONES TN'))
     trigo_anio_anterior = (listado_header[0], listado_anio_anterior[0], listado_anio_anterior[1].replace('MILLONES HA', ' MILLONES HA'), listado_anio_anterior[2].replace('QQ/HA', ' QQ/HA'), listado_anio_anterior[3].replace('MILLONES TN', ' MILLONES TN'))
 
-################################################################################
+########################################
 
     #Tabla del maiz
     maiz = estimaciones.find('table', class_ = 'bcr-estimaciones maiz color')
@@ -63,7 +65,7 @@ def cargar_datos_proyecciones():
     maiz_ultimo_anio = (listado_header_m[0], listado_ultimo_anio_m[0], listado_ultimo_anio_m[1].replace('MILLONES HA', ' MILLONES HA'), listado_ultimo_anio_m[2].replace('QQ/HA', ' QQ/HA'), listado_ultimo_anio_m[3].replace('MILLONES TN', ' MILLONES TN'))
     maiz_anio_anterior = (listado_header_m[0], listado_anio_anterior_m[0], listado_anio_anterior_m[1].replace('MILLONES HA', ' MILLONES HA'), listado_anio_anterior_m[2].replace('QQ/HA', ' QQ/HA'), listado_anio_anterior_m[3].replace('MILLONES TN', ' MILLONES TN'))
 
-###############################################################################
+#################################
     ###### Tabla de la Soja
     soja = estimaciones.find('table', class_ = 'bcr-estimaciones soja color')
 
@@ -88,7 +90,7 @@ def cargar_datos_proyecciones():
     soja_anio_anterior = (listado_header_s[0], listado_anio_anterior_s[0], listado_anio_anterior_s[1].replace('MILLONES HA', ' MILLONES HA'), listado_anio_anterior_s[2].replace('QQ/HA', ' QQ/HA'), listado_anio_anterior_s[3].replace('MILLONES TN', ' MILLONES TN'))
 
 #################################################################################
-#########  BASE DE DATOS
+#########  BASE DE DATOS ########
     conexion = sqlite3.connect("agricultura_test.db")
     #Para crear una tabla, creamos una variable de tipo cursor
     cursor = conexion.cursor()
@@ -112,7 +114,7 @@ def cargar_datos_proyecciones():
 
     conexion.close()
 
-#################################################################################
+################################################################################
 
 def eliminar_datos_proyecciones():
         #### Borramos las filas de la tabla
@@ -122,7 +124,7 @@ def eliminar_datos_proyecciones():
         #print('Se han eliminado', cursor.rowcount, 'filas de la tabla.')
         conexion.commit()
         conexion.close()
-##################################################################################
+#####################################################################################
 
 def consultar_trigo():
         conexion = sqlite3.connect("agricultura_test.db")
@@ -175,7 +177,7 @@ def consultar_trigo():
         print(f"Variación rindes en base al anio anterior: {round(variacion_rinde, 1)}%\n")
         print(f"Variación de la producción en base al anio anterior: {round(variacion_produccion, 1)}%\n")
 
-###################################################################################
+#######################################################################################
 def consultar_maiz():
         conexion = sqlite3.connect("agricultura_test.db")
         cursor = conexion.cursor()
@@ -250,7 +252,7 @@ def consultar_maiz():
             variacion_produccion = ((valor_actual_produccion - valor_ant_produccion) / valor_ant_produccion) * 100
             print(f"Variación de la producción en base al anio anterior: {round(variacion_produccion, 1)}%\n")
 
-###################################################################################
+##########################################################################################3
 def consultar_soja():
         conexion = sqlite3.connect("agricultura_test.db")
         cursor = conexion.cursor()
@@ -324,7 +326,8 @@ def consultar_soja():
             print(f"Variación de la producción en base al anio anterior: {round(variacion_produccion, 1)}%\n")
 
 
-###################################################################################
+##########################################################################################
+###### Web Scraping "www.inta.gob.ar" ######
 def cargar_datos_margenes():
     html_text = requests.get('https://inta.gob.ar/documentos/indicadores-economicos-e-informes-tecnicos').text
     #print(html_text) #response 200
@@ -388,7 +391,7 @@ def cargar_datos_margenes():
     row6 = (list_fila_6[0],list_fila_6[1],list_fila_6[2], list_fila_6[3])
 
     #######################################
-    ##BASE DE DATOS
+    ## BASE DE DATOS ##
     conexion = sqlite3.connect("agricultura_test.db")
     #Para crear una tabla, creamos una variable de tipo cursor
     cursor = conexion.cursor()
@@ -396,7 +399,7 @@ def cargar_datos_margenes():
     cursor.execute(f"create table if not exists margenes_test (Periodo VARCHAR(100), Elaboracion_estimada1 VARCHAR(100), Elaboracion_estimada2 VARCHAR(100), Obtenidos VARCHAR(100))")
 
 
-    # Ingresar y leer varios registros al mismo tiemp5
+    # Ingresar y leer varios registros al mismo tiempo
     # 
     margenes_gral = [
         row1,
@@ -413,7 +416,7 @@ def cargar_datos_margenes():
 
     conexion.close()
 
-###################################################################################
+#####################################################################################
 def eliminar_datos_margenes():
         #### Borramos las filas de la tabla
         conexion = sqlite3.connect("agricultura_test.db")
@@ -421,7 +424,8 @@ def eliminar_datos_margenes():
         cursor.execute('DELETE FROM margenes_test')
         conexion.commit()
         conexion.close()
-###################################################################################
+#######################################################################################
+###### Web Scraping "www.bolsadecereales.com" ######
 
 def cotizacion_trigo():
     cotizaciones_trigo = pd.read_html('https://www.bolsadecereales.com')[0]
@@ -453,7 +457,7 @@ def cotizacion_soja():
     cs = cs.drop(0, axis=0)
     return cs
 
-####################################################################################
+##############################################################################################
 ### Guardar en CSV las proyecciones de la producción
 
 def guardar_datos():
@@ -476,7 +480,20 @@ def guardar_datos():
         
     conexion.close()
 
+def clearscreen():
+    if platform.system() == "Windows":
+        os.system('cls')
+    else:
+        os.system('clear')  
+
+def pressenter():
+    print("*********************************************")
+    print("Presione ENTER para continuar")
+    input()
+    clearscreen()
+
 #############################################################################################################
+### Menu del usuario ###
 #############################################################################################################
 
 while True:
@@ -516,21 +533,25 @@ while True:
         print(df.head())
         eliminar_datos_proyecciones()
         eliminar_datos_margenes()
+        pressenter()
     
     elif opcion == '2':
         consultar_trigo()
         eliminar_datos_proyecciones()
         eliminar_datos_margenes()
+        pressenter()
 
     elif opcion == '3':
         consultar_maiz()
         eliminar_datos_proyecciones()
         eliminar_datos_margenes()
+        pressenter()
 
     elif opcion == '4':
         consultar_soja()
         eliminar_datos_proyecciones()
         eliminar_datos_margenes()
+        pressenter()
     
     elif opcion == '5':
         
@@ -540,18 +561,22 @@ while True:
         print(">>> Margenes de los granos principales: ")
         print(df.head())
         eliminar_datos_margenes()
+        pressenter()
     
     elif opcion == '6':
         print(cotizacion_trigo())
         eliminar_datos_margenes()
+        pressenter()
 
     elif opcion == '7':
         print(cotizacion_maiz())
         eliminar_datos_margenes()
+        pressenter()
 
     elif opcion == '8':
         print(cotizacion_soja())
         eliminar_datos_margenes()
+        pressenter()
 
     else:
         print('Hasta luego!')
