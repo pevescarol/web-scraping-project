@@ -1,7 +1,7 @@
 # web-scraping-project
 proyecto integrador con python
 
-> Al clonar este repo, hay tener instalado las siguiente librerias:
+> Al clonar este repo, hay que tener instalado las siguiente librerias:
 
 - Pandas
 - Sqlite3
